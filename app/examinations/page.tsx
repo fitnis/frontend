@@ -162,10 +162,10 @@ export default function ExaminationsPage() {
       {isLoading ? (
         <LoadingSpinner />
       ) : (
-        <DataTable
+        <DataTable<Examination>
           columns={columns}
-          data={examinations}
-          searchColumn="patientID"
+          data={examinations as Examination[]}
+          searchColumn="diagnosis"
           searchPlaceholder="Search by patient ID..."
         />
       )}

@@ -23,6 +23,11 @@ async function fetchApi<T>(
     );
   }
 
+  // Return null for 204 No Content responses
+  if (response.status === 204) {
+    return null as T;
+  }
+
   return response.json();
 }
 
