@@ -8,7 +8,7 @@ import { Providers } from "@/lib/providers"
 export const metadata: Metadata = {
   title: "Medical Application",
   description: "A frontend for managing patient medical records",
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
@@ -31,6 +31,8 @@ export default function RootLayout({
     </html>
   )
 }
+
+import "./globals.css"
 
 
 import './globals.css'

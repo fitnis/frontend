@@ -270,7 +270,7 @@ export interface UpdatePatientRequest {
 
 export interface Examination {
   id: number;
-  patientID: number;
+  patient: Patient;
   examDate: string;
   anamnesis?: string;
   diagnosis?: string;

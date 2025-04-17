@@ -12,46 +12,49 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingSpinner } from "@/components/loading-spinner"
 import { ErrorMessage } from "@/components/error-message"
-import { getPatient, updatePatient, queryKeys, type UpdatePatientRequest } from "@/lib/api"
+import { getExamination, updateExamination, queryKeys, type UpdateExaminationRequest } from "@/lib/api"
 import { formatDateForInput, formatDateForApi } from "@/lib/date-utils"
 
-export default function EditPatientPage() {
+export default function EditExaminationPage() {
   const params = useParams()
   const { id } = params as { id: string }
   const router = useRouter()
   const queryClient = useQueryClient()
-  const patientId = Number.parseInt(id)
+  const examinationId = Number.parseInt(id)
 
   const [error, setError] = useState<string | null>(null)
 
-  const { data: patient, isLoading } = useQuery({
-    queryKey: queryKeys.patients.detail(patientId),
-    queryFn: () => getPatient(patientId),
+  const { data: examination, isLoading } = useQuery({
+    queryKey: queryKeys.examinations.detail(examinationId),
+    queryFn: () => getExamination(examinationId),
     select: (data) => ({
       ...data,
-      birthDate: formatDateForInput(data.birthDate),
+      examDate: formatDateForInput(data.examDate),
     }),
+    onError: (err: Error) => {
+      setError(`Failed to load examination: ${err.message}`)
+    },
   })
 
   // Initialize formData as an empty object with type assertion
-  const [formData, setFormData] = useState<UpdatePatientRequest>({} as UpdatePatientRequest)
+  const [formData, setFormData] = useState<UpdateExaminationRequest>({} as UpdateExaminationRequest)
 
-  // Update formData when patient data is available
-  if (patient && Object.keys(formData).length === 0) {
-    setFormData(patient)
+  // Update formData when examination data is available
+  if (examination && Object.keys(formData).length === 0) {
+    setFormData(examination)
   }
 
   const mutation = useMutation({
-    mutationFn: (data: UpdatePatientRequest) => updatePatient(patientId, data),
+    mutationFn: (data: UpdateExaminationRequest) => updateExamination(examinationId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.patients.detail(patientId),
+        queryKey: queryKeys.examinations.detail(examinationId),
       })
-      queryClient.invalidateQueries({ queryKey: queryKeys.patients.all })
-      router.push("/patients")
+      queryClient.invalidateQueries({ queryKey: queryKeys.examinations.all })
+      router.push("/examinations")
     },
     onError: (err: Error) => {
-      setError(`Failed to update patient: ${err.message}`)
+      setError(`Failed to update examination: ${err.message}`)
     },
   })
 
@@ -66,7 +69,7 @@ export default function EditPatientPage() {
     // Format the date for the API
     const formattedData = {
       ...formData,
-      birthDate: formData.birthDate ? formatDateForApi(formData.birthDate) : undefined,
+      examDate: formData.examDate ? formatDateForApi(formData.examDate) : undefined,
     }
 
     mutation.mutate(formattedData)
@@ -75,7 +78,7 @@ export default function EditPatientPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto p-4">
-        <h1 className="mb-6 text-3xl font-bold">Edit Patient</h1>
+        <h1 className="mb-6 text-3xl font-bold">Edit Examination</h1>
         <LoadingSpinner />
       </div>
     )
@@ -83,44 +86,50 @@ export default function EditPatientPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="mb-6 text-3xl font-bold">Edit Patient</h1>
+      <h1 className="mb-6 text-3xl font-bold">Edit Examination</h1>
 
       {error && <ErrorMessage message={error} />}
 
       <Card>
         <CardHeader>
-          <CardTitle>Patient Information</CardTitle>
+          <CardTitle>Examination Information</CardTitle>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} required />
-              </div>
-            </div>
             <div className="space-y-2">
-              <Label htmlFor="birthDate">Birth Date</Label>
+              <Label htmlFor="examDate">Examination Date</Label>
               <Input
-                id="birthDate"
-                name="birthDate"
+                id="examDate"
+                name="examDate"
                 type="date"
-                value={formData.birthDate || ""}
+                value={formData.examDate || ""}
                 onChange={handleChange}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="details">Additional Details</Label>
-              <Textarea id="details" name="details" value={formData.details || ""} onChange={handleChange} rows={4} />
+              <Label htmlFor="anamnesis">Anamnesis</Label>
+              <Textarea
+                id="anamnesis"
+                name="anamnesis"
+                value={formData.anamnesis || ""}
+                onChange={handleChange}
+                rows={4}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="diagnosis">Diagnosis</Label>
+              <Textarea
+                id="diagnosis"
+                name="diagnosis"
+                value={formData.diagnosis || ""}
+                onChange={handleChange}
+                rows={4}
+              />
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button type="button" variant="outline" onClick={() => router.push("/patients")}>
+            <Button type="button" variant="outline" onClick={() => router.push("/examinations")}>
               Cancel
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
